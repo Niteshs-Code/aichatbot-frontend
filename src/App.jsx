@@ -25,7 +25,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/verification-success" element={<VerificationSuccess />} />
           <Route path="/oauth-success" element={<OAuthSuccess />} />
-          <Route path="/complete-profile" element={<CompleteProfile />} />
+          <Route path="/complete-profile" element={<PrivateRoute><CompleteProfile /></PrivateRoute>} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/share/:shareId" element={<SharedConversation />} />
