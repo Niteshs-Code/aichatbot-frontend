@@ -6,7 +6,7 @@ export default function ForgotPassword() {
 
 
 const isValidEmail = (email) => {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+   return /^[a-zA-Z0-9._%+-]+@gmail\.com$/i.test(email);
 };
   const [email, setEmail] = useState("");
   const [cooldown, setCooldown] = useState(0);
@@ -64,6 +64,7 @@ useEffect(() => {
 
   if (!isValidEmail(email)) {
     showToast("Please enter a valid email ❌", "error");
+    toast.error("Only Gmail addresses are allowed");
     return;
   }
 
