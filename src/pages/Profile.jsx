@@ -35,13 +35,19 @@ export default function Profile() {
 
 const handleRemoveImage = async () => {
   try {
-    await API.put("/auth/profile", {
-      profilePic: ""
-    });
+    await axios.delete("/api/profile/remove");
 
-    loadProfile(); // reload data
-  } catch (error) {
-    console.log(error);
+    setUser((prev) => ({
+      ...prev,
+      image: null,
+    }));
+
+    document.getElementById("imageInput").value = "";
+
+    toast.success("Image removed");
+
+  } catch (err) {
+    toast.error("Remove failed");
   }
 };
 
@@ -60,16 +66,31 @@ const handleRemoveImage = async () => {
     return name ? name.charAt(0).toUpperCase() : "?";
   };
 
-  const handlePhoto = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const handlePhoto = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setForm({ ...form, profilePic: reader.result });
-    };
-    reader.readAsDataURL(file);
-  };
+  try {
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const res = await axios.post("/api/profile/upload", formData);
+
+    //  Proper state update
+    setUser((prev) => ({
+      ...prev,
+      image: res.data.image,
+    }));
+
+    toast.success("Image updated");
+
+  } catch (err) {
+    toast.error("Upload failed");
+  }
+
+  // YE LINE MISSING HOTI HAI usually
+  e.target.value = "";
+};
 
   const updateProfile = async () => {
   try {

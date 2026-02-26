@@ -265,7 +265,7 @@ const sendMessage = async () => {
   setCurrentTopicId(res.data._id);
   setTopicTitle(res.data.title);
   setMessages(res.data.messages);
-  console.log("API Response:", res.data);
+
 
 } else {
   res = await API.post(`/topics/message/${currentTopicId}`, {
@@ -610,7 +610,7 @@ const sendMessage = async () => {
         <button
           key={index}
           onClick={() => {setInput(prompt); 
-            setShowSuggestions(false);
+          
           }}
           className={`p-2 rounded-xl border text-left transition ${
             dark
