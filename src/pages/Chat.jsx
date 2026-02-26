@@ -388,7 +388,7 @@ const sendMessage = async () => {
     collapsed ? "lg:w-15 flex-col pt-2  " : "lg:w-60 "
   }
   ${slide ? "w-full h-screen absolute z-2 ": "w-0"}
-  transition-all duration-500 ease-in-out border-gray-300 border-r lg:pl-2 pl-0 ${dark ? "bg-black border-gray-400 text-white": "bg-white"} lg:block `}
+  transition-all duration-500 ease-in-out border-gray-300 lg:border-r border-none lg:pl-2 pl-0 ${dark ? "bg-black border-gray-400 text-white": "bg-white"} lg:block `}
 >  
 
 {/* upparicons */}
