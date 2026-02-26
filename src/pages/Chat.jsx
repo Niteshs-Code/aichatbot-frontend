@@ -474,7 +474,9 @@ const sendMessage = async () => {
   />
 ) : (
   <span
-    onClick={() => loadTopic(t)}
+    onClick={() => {loadTopic(t);
+      setSlide(false);
+    }}
     className="flex-1 cursor-pointer"
   >
     {t.title.length > 15
