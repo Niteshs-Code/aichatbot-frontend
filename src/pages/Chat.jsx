@@ -37,15 +37,15 @@ export default function Chat() {
   const [showShare, setShowShare] = useState(false);
 const [shareUrl, setShareUrl] = useState("");
 const [copied, setCopied] = useState(false);
-const [openMenu, setOpenMenu] = useState(false);
 const [activeMenuId, setActiveMenuId] = useState(null);
 const [collapsed, setCollapsed] = useState(false);
 const [showSearch, setShowSearch] = useState(false);
 const [dark, setDark] = useState(false);
-const [slide, setSlide] = useState(true);
+const [slide, setSlide] = useState(false);
 const [editingId, setEditingId] = useState(null);
 const [newTitle, setNewTitle] = useState("");
 const [deleteId, setDeleteId] = useState(null);
+
 
 
 
@@ -56,6 +56,13 @@ const navigate = useNavigate();
 
 
   // all useEffect
+
+ const quickPrompts = [
+  "How many hairs are there on a human head?",
+  "How was the Earth formed?",
+  "Why is the sky blue?",
+  "What would happen if humans disappeared tomorrow?"
+];
 
  useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
@@ -78,15 +85,15 @@ const navigate = useNavigate();
 useEffect(() => {
   const handleClickOutside = (event) => {
     if (menuRef.current && !menuRef.current.contains(event.target)) {
-      setOpenMenu(false);
+      setActiveMenuId(null);
     }
   };
 
   const handleScroll = () => {
-    setOpenMenu(false);
+    setActiveMenuId(null);
   };
 
-  if (openMenu) {
+  if (activeMenuId) {
     document.addEventListener("mousedown", handleClickOutside);
     window.addEventListener("scroll", handleScroll);
   }
@@ -95,7 +102,7 @@ useEffect(() => {
     document.removeEventListener("mousedown", handleClickOutside);
     window.removeEventListener("scroll", handleScroll);
   };
-}, [openMenu]);
+}, [activeMenuId]);
 
   
 
@@ -380,8 +387,8 @@ const sendMessage = async () => {
   className={`${
     collapsed ? "lg:w-15 flex-col pt-2  " : "lg:w-60 "
   }
-  ${slide ? "w-full h-screen absolute z-2": "hidden"}
-  transition-all duration-700 border-gray-300 border-r pl-2 ${dark ? "bg-black border-gray-400 text-white": "bg-white"} lg:block `}
+  ${slide ? "w-full h-screen absolute z-2 ": "w-0"}
+  transition-all duration-500 ease-in-out border-gray-300 border-r lg:pl-2 pl-0 ${dark ? "bg-black border-gray-400 text-white": "bg-white"} lg:block `}
 >  
 
 {/* upparicons */}
@@ -405,6 +412,7 @@ const sendMessage = async () => {
   onClick={() => {
     setCurrentTopicId(null);
     setMessages([]);
+    setSlide(false);
   }}
 > 
  {!collapsed && (<p className="inline"><AiOutlineWechat className="inline text-xl" /> New chat</p>
@@ -493,7 +501,7 @@ const sendMessage = async () => {
     
     <div
       ref={menuRef}
-      className={`absolute right-0 mt-2 w-30 rounded-xl shadow-xl border-gray-400 border p-1 z-50  ${dark ? "bg-blackborder-2" : "bg-white"}`}
+      className={`absolute right-0 mt-2 w-30 rounded-xl shadow-xl border-gray-400 border p-1 z-50  ${dark ? "bg-blackborder-2 bg-black" : "bg-white"}`}
     >
       <button className={`border-gray-400  items-center  justify-center flex w-full text-left px-1 py-1 ${dark ? "hover:bg-gray-700": "hover:bg-gray-200"} rounded-md cursor-pointer`}   onClick={() => renameTopic(t._id, t.title)}>
         <CiEdit  className="inline mr-2"/> Rename
@@ -526,7 +534,7 @@ const sendMessage = async () => {
     </div>
 
     {/* RIGHT CHAT AREA */}
-    <div className={`w-full  flex flex-col relative ${dark ? "bg-black text-white": "bg-white"} `}>
+    <div className={`w-full  flex flex-col relative  ${dark ? "bg-black text-white": "bg-white"} `}>
       <button
       onClick={()=>{setSlide(true)}}
        className={`p-1 absolute   block z-5 top-3  text-xl left-2 lg:hidden ${slide ? "hidden":'block'} ${dark ? "text-white bg-gray-800 ": " text-black bg-white/25" }`} ><GiHamburgerMenu /></button> 
@@ -542,7 +550,7 @@ const sendMessage = async () => {
 
  
 <div className={`h-[83%] flex justify-center `}>
-  <div className="w-4/5 max-w-3xl flex flex-col  rounded-xl my-2  ">
+  <div className="lg:w-4/5 w-full max-w-3xl flex flex-col  rounded-xl lg:my-2 mb-8">
 
     {/* Messages Container */}
     <div className="flex-1 overflow-y-auto p-2 no-scrollbar">
@@ -587,6 +595,36 @@ const sendMessage = async () => {
 
   </div>
 </div>
+
+
+{/* Quick Prompts */}
+{(messages.length === 0 && input.trim() === "") && (
+  <div className="flex flex-col items-center justify-center h-full text-center mb-60 px-6">
+
+    <h2 className={`text-2xl font-semibold mb-8 ${dark ? "text-white" : "text-gray-800"}`}>
+      What would you like to work on?
+    </h2>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl">
+      {quickPrompts.map((prompt, index) => (
+        <button
+          key={index}
+          onClick={() => {setInput(prompt); 
+            setShowSuggestions(false);
+          }}
+          className={`p-2 rounded-xl border text-left transition ${
+            dark
+              ? "border-gray-600 hover:bg-gray-700 text-white"
+              : "border-gray-300 hover:bg-gray-100 text-gray-800"
+          }`}
+        >
+          {prompt}
+        </button>
+      ))}
+    </div>
+
+  </div>
+)}
 
 
 {/* input bar */}
@@ -668,7 +706,7 @@ const sendMessage = async () => {
       currentTopicId === t._id ? "bg-blue-100" : ""
     }`}
   >
-    <span onClick={() => {loadTopic(t), setShowSearch(false)}} className="flex-1">
+    <span onClick={() => {loadTopic(t), setShowSearch(false), setSlide(false)}} className="flex-1">
       {t.title.length  > 30 ? t.title.slice(0, 30) +"..." : t.title}
     </span>
 
