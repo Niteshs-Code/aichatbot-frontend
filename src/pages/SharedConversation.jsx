@@ -1,6 +1,12 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
+
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+
 export default function SharedConversation() {
   const { shareId } = useParams();
   const [data, setData] = useState(null);
@@ -11,7 +17,23 @@ export default function SharedConversation() {
       .then(data => setData(data));
   }, []);
 
-  if (!data) return <div>Loading...</div>;
+  if (!data) return <div className="flex items-center justify-center min-h-screen bg-black">
+      <div className="flex flex-col items-center gap-6">
+        
+        {/* Spinner */}
+        <div className="relative">
+          <div className="w-20 h-20 rounded-full border-4 border-gray-700"></div>
+          <div className="w-20 h-20 rounded-full border-4 border-t-cyan-400 border-r-transparent border-b-transparent border-l-transparent animate-spin absolute top-0 left-0 shadow-[0_0_25px_#22d3ee]"></div>
+        </div>
+
+        {/* Text */}
+        <p className="text-cyan-400 text-lg tracking-widest animate-pulse">
+          Loading...
+        </p>
+
+      </div>
+    </div>;
+
 
  return (
   <div className="h-screen bg-gray-100 flex justify-center items-center">
@@ -38,7 +60,30 @@ export default function SharedConversation() {
                   : "bg-gray-200 text-gray-800 rounded-bl-none"}
               `}
             >
-              {msg}
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  code({ node, inline, className, children, ...props }) {
+                    const match = /language-(\w+)/.exec(className || "");
+                    return !inline && match ? (
+                      <SyntaxHighlighter
+                        style={oneDark}
+                        language={match[1]}
+                        PreTag="div"
+                        {...props}
+                      >
+                        {String(children).replace(/\n$/, "")}
+                      </SyntaxHighlighter>
+                    ) : (
+                      <code className="bg-gray-200 px-1 rounded">
+                        {children}
+                      </code>
+                    );
+                  },
+                }}
+              >
+                {msg}
+              </ReactMarkdown>
             </div>
           </div>
         );

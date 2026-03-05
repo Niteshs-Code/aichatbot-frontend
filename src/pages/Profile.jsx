@@ -11,6 +11,7 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [toast, setToast] = useState(null);
+  
 
   const [form, setForm] = useState({
     name: "",
@@ -33,21 +34,23 @@ export default function Profile() {
 };
 
 
+
+
 const handleRemoveImage = async () => {
   try {
-    await API.delete("/profile/remove");
+    await API.delete("auth/profile/remove");
 
-    setUser((prev) => ({
+    setForm((prev) => ({
       ...prev,
-      image: null,
+      profilePic: "",
     }));
 
-    document.getElementById("imageInput").value = "";
-
-    toast.success("Image removed");
+    setToast("Image removed ✅");
+    setTimeout(() => setToast(null), 2000);
 
   } catch (err) {
-    toast.error("Remove failed");
+    setToast("Remove failed ❌");
+    setTimeout(() => setToast(null), 2000);
   }
 };
 
@@ -66,35 +69,34 @@ const handleRemoveImage = async () => {
     return name ? name.charAt(0).toUpperCase() : "?";
   };
 
-  const handlePhoto = async (e) => {
+ const handlePhoto = (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
-  try {
-    const formData = new FormData();
-    formData.append("image", file);
-
-    const res = await API.post("/profile/upload", formData);
-
-    //  Proper state update
-    setUser((prev) => ({
-      ...prev,
-      image: res.data.image,
-    }));
-
-    toast.success("Image updated");
-
-  } catch (err) {
-    toast.error("Upload failed");
+  const maxSize = 1 * 1024 * 1024;
+  if (file.size > maxSize) {
+    setToast("Image must be less than 1MB ⚠️");
+    setTimeout(() => setToast(null), 3000);
+    return;
   }
 
-  // YE LINE MISSING HOTI HAI usually
-  e.target.value = "";
+  const reader = new FileReader();
+
+  reader.onloadend = () => {
+    const base64String = reader.result;
+
+    setForm((prev) => ({
+      ...prev,
+      profilePic: base64String
+    }));
+  };
+
+  reader.readAsDataURL(file);
 };
 
   const updateProfile = async () => {
-  try {
-    await API.put("/auth/profile", form);
+  try {                                                        
+    await API.put("auth/profile", form);
 
     setToast("Profile Updated Successfully ✅");
     setIsEditing(false);
@@ -139,22 +141,22 @@ const handleRemoveImage = async () => {
 };
 
 
-  // if (!user) return  <div className="flex items-center justify-center min-h-screen bg-black">
-  //     <div className="flex flex-col items-center gap-6">
+  if (!user) return  <div className="flex items-center justify-center min-h-screen bg-black">
+      <div className="flex flex-col items-center gap-6">
         
-  //       {/* Spinner */}
-  //       <div className="relative">
-  //         <div className="w-20 h-20 rounded-full border-4 border-gray-700"></div>
-  //         <div className="w-20 h-20 rounded-full border-4 border-t-cyan-400 border-r-transparent border-b-transparent border-l-transparent animate-spin absolute top-0 left-0 shadow-[0_0_25px_#22d3ee]"></div>
-  //       </div>
+        {/* Spinner */}
+        <div className="relative">
+          <div className="w-20 h-20 rounded-full border-4 border-gray-700"></div>
+          <div className="w-20 h-20 rounded-full border-4 border-t-cyan-400 border-r-transparent border-b-transparent border-l-transparent animate-spin absolute top-0 left-0 shadow-[0_0_25px_#22d3ee]"></div>
+        </div>
 
-  //       {/* Text */}
-  //       <p className="text-cyan-400 text-lg tracking-widest animate-pulse">
-  //         Loading...
-  //       </p>
+        {/* Text */}
+        <p className="text-cyan-400 text-lg tracking-widest animate-pulse">
+          Loading...
+        </p>
 
-  //     </div>
-  //   </div>;
+      </div>
+    </div>;
 
   return (
    <>
@@ -175,54 +177,60 @@ const handleRemoveImage = async () => {
         <div className="flex flex-col items-center mb-8">
           <div className="relative w-32 h-32 group">
 
-            {form.profilePic ? (
-              <img
-                src={form.profilePic}
-                className="w-32 h-32 rounded-full object-cover 
-                           border-4 border-white shadow-2xl 
-                           transition duration-500 group-hover:scale-105"
-                alt="profile"
-              />
-            ) : (
-              <div className="w-32 h-32 rounded-full 
-                              bg-gradient-to-r from-yellow-400 to-orange-500 
-                              flex items-center justify-center 
-                              text-5xl font-bold shadow-2xl">
-                {getInitial(form.name)}
+  {form.profilePic ? (
+    <img
+      src={form.profilePic}
+      className="w-32 h-32 rounded-full object-cover 
+                 border-4 border-white shadow-2xl"
+      alt="profile"
+    />
+  ) : (
+    <div className="w-32 h-32 rounded-full 
+                    bg-gradient-to-r from-yellow-400 to-orange-500 
+                    flex items-center justify-center 
+                    text-5xl font-bold shadow-2xl">
+      {getInitial(form.name)}
+    </div>
+  )}
 
-                {isEditing && (
-      <>
-        <input
-          type="file"
-          id="imageInput"
-          hidden
-          onChange={handlePhoto}
-        />
 
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 
-                        flex gap-3 bg-black/60 backdrop-blur-md 
-                        px-4 py-1 rounded-full shadow-lg">
 
-          <button
-            onClick={handleEditImage}
-            className="text-sm text-white hover:text-green-300 transition"
-          >
-            Edit
-          </button>
+  {/* ✅ MOVE THIS OUTSIDE */}
+  {isEditing && (
+    <>
+    <div className="">
+      <input
+        type="file"
+        id="imageInput"
+        hidden
+        onChange={handlePhoto}
+      />
 
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 
+                      flex gap-3 bg-black/60 backdrop-blur-md 
+                      px-4 py-1 rounded-full shadow-lg">
+
+        <button
+          onClick={handleEditImage}
+          className="text-sm text-white hover:text-green-300 transition"
+        >
+          Edit
+        </button>
+  <div className="text-white absolute top-7 font-semibold "> Size: &lt; 1MB</div>
+        {form.profilePic && (
           <button
             onClick={handleRemoveImage}
             className="text-sm text-red-300 hover:text-red-500 transition"
           >
             Remove
           </button>
-
-        </div>
-      </>
-    )}
-              </div>
-            )}
-          </div>
+        )}
+      </div>
+    
+      </div>
+    </>
+  )}
+</div>
 
           <h2 className="mt-6 text-2xl font-semibold">{form.name}</h2>
 
