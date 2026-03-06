@@ -198,7 +198,8 @@ const handleRemoveImage = async () => {
   {/* ✅ MOVE THIS OUTSIDE */}
   {isEditing && (
     <>
-    <div className="">
+    <div className=" ">
+      <div > Size: &lt; 1MB</div>
       <input
         type="file"
         id="imageInput"
@@ -216,7 +217,7 @@ const handleRemoveImage = async () => {
         >
           Edit
         </button>
-  <div className="text-white absolute top-7 font-semibold "> Size: &lt; 1MB</div>
+  
         {form.profilePic && (
           <button
             onClick={handleRemoveImage}
